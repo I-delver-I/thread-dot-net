@@ -11,9 +11,33 @@ namespace Thread.NET.BLL.Services
     {
         public LikeService(ThreadContext context, IMapper mapper) : base(context, mapper) { }
 
+        public async Task LikeComment(NewReactionDTO reaction)
+        {
+            var likes = _context.CommentReactions
+                .Where(r => (r.UserId == reaction.UserId) && (r.CommentId == reaction.EntityId));
+
+            if (likes.Any())
+            {
+                _context.CommentReactions.RemoveRange(likes);
+                await _context.SaveChangesAsync();
+
+                return;
+            }
+
+            _context.CommentReactions.Add(new DAL.Entities.CommentReaction
+            {
+                CommentId = reaction.EntityId,
+                IsLike = reaction.IsLike,
+                UserId = reaction.UserId
+            });
+
+            await _context.SaveChangesAsync();
+        }
+        
         public async Task LikePost(NewReactionDTO reaction)
         {
-            var likes = _context.PostReactions.Where(x => x.UserId == reaction.UserId && x.PostId == reaction.EntityId);
+            var likes = _context.PostReactions.Where(x => x.UserId == reaction.UserId 
+                                                          && x.PostId == reaction.EntityId);
 
             if (likes.Any())
             {
