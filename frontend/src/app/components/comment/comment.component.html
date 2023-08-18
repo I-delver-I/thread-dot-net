@@ -8,7 +8,7 @@
     <p>{{comment.body}}</p>
   </mat-card-content>
   <mat-card-actions class="actions-buttons" align="end">
-    <button mat-icon-button color="primary" (click)="likeComment()">
+    <button mat-icon-button color="primary" (click)="likeComment(true)">
       <mat-icon matBadge="{{comment.reactions.length}}" matBadgeColor="accent" matBadgeSize="medium"
                 [matBadgeHidden]="comment.reactions.length === 0" aria-label="Like">favorite</mat-icon>
     </button>

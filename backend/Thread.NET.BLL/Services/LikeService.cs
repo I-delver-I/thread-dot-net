@@ -36,15 +36,18 @@ namespace Thread.NET.BLL.Services
         
         public async Task LikePost(NewReactionDTO reaction)
         {
-            var likes = _context.PostReactions.Where(x => x.UserId == reaction.UserId 
-                                                          && x.PostId == reaction.EntityId);
+            var like = _context.PostReactions.FirstOrDefault(x => x.UserId == reaction.UserId 
+                                                         && x.PostId == reaction.EntityId);
 
-            if (likes.Any())
+            if (like is not null)
             {
-                _context.PostReactions.RemoveRange(likes);
-                await _context.SaveChangesAsync();
-
-                return;
+                _context.PostReactions.Remove(like);
+                
+                if (like.IsLike == reaction.IsLike)
+                {
+                    await _context.SaveChangesAsync();
+                    return;
+                }
             }
 
             _context.PostReactions.Add(new DAL.Entities.PostReaction

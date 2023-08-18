@@ -19,7 +19,7 @@ export class CommentComponent implements OnDestroy {
 
     public constructor(private authService: AuthenticationService, private likeService: LikeService) {}
 
-    public likeComment() {
+    public likeComment(isLike) {
         this.authService.getUser()
             .pipe(takeUntil(this.unsubscribe$))
             .subscribe((user) => {
@@ -29,7 +29,7 @@ export class CommentComponent implements OnDestroy {
             })
 
         this.likeService
-            .likeComment(this.comment, this.currentUser)
+            .likeComment(this.comment, this.currentUser, isLike)
             .pipe(takeUntil(this.unsubscribe$))
             .subscribe((comment) => (this.comment = comment));
     }

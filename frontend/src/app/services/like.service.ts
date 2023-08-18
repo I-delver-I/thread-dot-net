@@ -14,12 +14,12 @@ export class LikeService {
     public constructor(private authService: AuthenticationService, private postService: PostService,
                        private commentService: CommentService) {}
 
-    public likeComment(comment: Comment, currentUser: User) {
+    public likeComment(comment: Comment, currentUser: User, isLike: boolean) {
         const innerComment = comment;
 
         const reaction: NewReaction = {
             entityId: innerComment.id,
-            isLike: true,
+            isLike: isLike,
             userId: currentUser.id
         };
 
@@ -27,7 +27,7 @@ export class LikeService {
         let hasReaction = innerComment.reactions.some((r) => r.user.id === currentUser.id);
         innerComment.reactions = hasReaction
             ? innerComment.reactions.filter((r) => r.user.id !== currentUser.id)
-            : innerComment.reactions.concat({ isLike: true, user: currentUser });
+            : innerComment.reactions.concat({ isLike: isLike, user: currentUser });
         hasReaction = innerComment.reactions.some((r) => r.user.id === currentUser.id);
 
         return this.commentService.likeComment(reaction).pipe(
@@ -36,27 +36,39 @@ export class LikeService {
                 // revert current array changes in case of any error
                 innerComment.reactions = hasReaction
                     ? innerComment.reactions.filter((x) => x.user.id !== currentUser.id)
-                    : innerComment.reactions.concat({ isLike: true, user: currentUser });
+                    : innerComment.reactions.concat({ isLike: isLike, user: currentUser });
 
                 return of(innerComment);
             })
         );
     }
 
-    public likePost(post: Post, currentUser: User) {
+    public likePost(post: Post, currentUser: User, isLike: boolean) {
         const innerPost = post;
 
         const reaction: NewReaction = {
             entityId: innerPost.id,
-            isLike: true,
+            isLike: isLike,
             userId: currentUser.id
         };
 
         // update current array instantly
-        let hasReaction = innerPost.reactions.some((x) => x.user.id === currentUser.id);
+        let existedReaction = innerPost.reactions
+            .find((r) => r.user.id === currentUser.id);
+        let hasReaction = existedReaction !== undefined;
+
         innerPost.reactions = hasReaction
             ? innerPost.reactions.filter((x) => x.user.id !== currentUser.id)
-            : innerPost.reactions.concat({ isLike: true, user: currentUser });
+            : innerPost.reactions.concat({ isLike: isLike, user: currentUser });
+
+        if (hasReaction) {
+            let isExistedReactionOpposite = existedReaction.isLike !== isLike;
+
+            if (isExistedReactionOpposite) {
+                this.likePost(post, currentUser, isLike);
+            }
+        }
+
         hasReaction = innerPost.reactions.some((x) => x.user.id === currentUser.id);
 
         return this.postService.likePost(reaction).pipe(
@@ -65,7 +77,7 @@ export class LikeService {
                 // revert current array changes in case of any error
                 innerPost.reactions = hasReaction
                     ? innerPost.reactions.filter((x) => x.user.id !== currentUser.id)
-                    : innerPost.reactions.concat({ isLike: true, user: currentUser });
+                    : innerPost.reactions.concat({ isLike: isLike, user: currentUser });
 
                 return of(innerPost);
             })

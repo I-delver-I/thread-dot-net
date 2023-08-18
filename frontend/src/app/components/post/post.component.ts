@@ -55,11 +55,15 @@ export class PostComponent implements OnDestroy {
         this.showComments = !this.showComments;
     }
 
-    public likePost() {
+    public getReactionsCount(isLike: boolean): number {
+        return this.post.reactions.filter(reaction => reaction.isLike == isLike).length;
+    }
+
+    public likePost(isLike: boolean) {
         if (!this.currentUser) {
             this.catchErrorWrapper(this.authService.getUser())
                 .pipe(
-                    switchMap((userResp) => this.likeService.likePost(this.post, userResp)),
+                    switchMap((userResp) => this.likeService.likePost(this.post, userResp, isLike)),
                     takeUntil(this.unsubscribe$)
                 )
                 .subscribe((post) => (this.post = post));
@@ -68,7 +72,7 @@ export class PostComponent implements OnDestroy {
         }
 
         this.likeService
-            .likePost(this.post, this.currentUser)
+            .likePost(this.post, this.currentUser, isLike)
             .pipe(takeUntil(this.unsubscribe$))
             .subscribe((post) => (this.post = post));
     }

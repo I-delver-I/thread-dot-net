@@ -9,9 +9,13 @@
     <p>{{post.body}}</p>
   </mat-card-content>
   <mat-card-actions class="actions-buttons" align="end">
-    <button mat-icon-button color="primary" (click)="likePost()">
-      <mat-icon matBadge="{{post.reactions.length}}" matBadgeColor="accent" matBadgeSize="medium"
-        [matBadgeHidden]="post.reactions.length === 0" aria-label="Like">favorite</mat-icon>
+    <button mat-icon-button color="primary" (click)="likePost(true)">
+      <mat-icon matBadge="{{getReactionsCount(true)}}" matBadgeColor="accent" matBadgeSize="medium"
+        [matBadgeHidden]="getReactionsCount(true) === 0" aria-label="Like">favorite</mat-icon>
+    </button>
+    <button mat-icon-button color="primary" (click)="likePost(false)">
+      <mat-icon matBadge="{{getReactionsCount(false)}}" matBadgeColor="accent" matBadgeSize="medium"
+                [matBadgeHidden]="getReactionsCount(false) === 0" aria-label="Dislike">thumb_down</mat-icon>
     </button>
     <button mat-icon-button color="accent">
       <mat-icon aria-label="Share">share</mat-icon>
